@@ -25,12 +25,56 @@ describe 'WhoAmI', ->
     afterEach 'close client', ->
       @sut.close()
 
-    describe 'when whoami is called', ->
+    describe 'when whoami is responds with the device', ->
       beforeEach (done) ->
         @client.on 'stanza', (@request) =>
           # console.log 'whoami stanza', @request
           @client.send new xmpp.Stanza('iq',
             type: 'result'
+            to: @request.attrs.from
+            from: @request.attrs.to
+            id: @request.attrs.id
+          ).c('response').c('rawData').t JSON.stringify({
+            uuid: 'uuid'
+            discoverWhitelist: ['uuid']
+          })
+
+        @sut.whoami (error, @response) => done error
+
+      it 'should send a stanza to the server', ->
+        expect(@request).to.exist
+        expect(@request.toJSON()).to.containSubset
+          name: 'iq'
+          attrs:
+            to: 'localhost'
+            type: 'get'
+          children: [{
+            name: 'request'
+            children: [{
+              name: 'metadata'
+              children: [{
+                name: 'jobType'
+                children: ['GetDevice']
+              },{
+                name: 'toUuid'
+                children: ['uuid']
+              }]
+            }]
+          }]
+
+      it 'should return a status of online: true', ->
+        expect(@response).to.exist
+        expect(@response).to.deep.equal {
+          uuid: 'uuid'
+          discoverWhitelist: ['uuid']
+        }
+
+    describe 'when whoami responds with a 404', ->
+      beforeEach (done) ->
+        @client.on 'stanza', (@request) =>
+          # console.log 'whoami stanza', @request
+          @client.send new xmpp.Stanza('iq',
+            type: 'error'
             to: @request.attrs.from
             from: @request.attrs.to
             id: @request.attrs.id

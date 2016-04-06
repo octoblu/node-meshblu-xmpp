@@ -54,8 +54,8 @@ class MeshbluXMPP extends EventEmitter2
         .cnode(ltx.parse jsontoxml request)
 
   _parseResponse: (stanza, callback) =>
-    rawData = stanza.toJSON().children[0].children[0].children[0]
-    callback null, { data: JSON.parse rawData }
+    rawData = stanza.getChild('response').getChild('rawData')
+    callback null, { data: JSON.parse rawData.getText() }
 
   _sendRequest: (request, callback) =>
     responseId = uuid.v1()
