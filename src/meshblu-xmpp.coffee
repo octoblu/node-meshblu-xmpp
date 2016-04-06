@@ -1,6 +1,7 @@
-_              = require 'lodash'
+_               = require 'lodash'
 {EventEmitter2} = require 'EventEmitter2'
-Client         = require 'node-xmpp-client'
+Client          = require 'node-xmpp-client'
+xml2js          = require 'xml2js'
 
 class MeshbluXMPP extends EventEmitter2
   constructor: (options={}) ->
@@ -27,14 +28,22 @@ class MeshbluXMPP extends EventEmitter2
 
   status: (callback) =>
     @connection.once 'stanza', (stanza) =>
-      callback null, @_parseResponse stanza
+      @_parseResponse stanza, (error, response) =>
+        return callback error if error?
+        return callback null, response.data
 
     @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('status')
 
-  _parseResponse: (stanza) =>
-    response = {}
-    _.each stanza.toJSON().children, (child) =>
-      response[child.name] = _.first child.children
-    response
+  whoami: (callback) =>
+    @connection.once 'stanza', (stanza) =>
+      @_parseResponse stanza, (error, response) =>
+        return callback error if error?
+        return callback null, JSON.stringify response
+
+    @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('whoami')
+
+  _parseResponse: (stanza, callback) =>
+    rawData = stanza.toJSON().children[0].children[0].children[0]
+    callback null, { data: JSON.parse rawData }
 
 module.exports = MeshbluXMPP

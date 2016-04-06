@@ -2,7 +2,7 @@ _ = require 'lodash'
 xmpp = require 'node-xmpp-server'
 MeshbluXMPP = require '../'
 
-describe 'Status', ->
+xdescribe 'WhoAmI', ->
   beforeEach (done) ->
     @server = new xmpp.C2S.TCPServer
       port: 5222
@@ -25,16 +25,17 @@ describe 'Status', ->
     afterEach 'close client', ->
       @sut.close()
 
-    describe 'when status is called', ->
+    describe 'when whoami is called', ->
       beforeEach (done) ->
         @client.on 'stanza', (@request) =>
           @client.send new xmpp.Stanza('iq',
             type: 'result'
             to: @request.attrs.from
             from: @request.attrs.to
-          ).c('response').c('rawData').t JSON.stringify meshblu: 'online'
+          )
+          .c('device').t('uuid')
 
-        @sut.status (error, @response) => done error
+        @sut.whoami (error, @response) => done error
 
       it 'should send a stanza to the server', ->
         expect(@request).to.exist
@@ -44,7 +45,7 @@ describe 'Status', ->
             to: 'localhost'
             type: 'get'
           children: [{
-            name: 'status'
+            name: 'whoami'
           }]
 
       it 'should return a status of online: true', ->
