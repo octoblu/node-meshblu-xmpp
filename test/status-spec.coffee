@@ -32,7 +32,9 @@ describe 'Status', ->
             type: 'result'
             to: @request.attrs.from
             from: @request.attrs.to
-          ).c('response').c('rawData').t JSON.stringify meshblu: 'online'
+          ).c('response').c('rawData').t JSON.stringify({
+            meshblu: 'online'
+          })
 
         @sut.status (error, @response) => done error
 

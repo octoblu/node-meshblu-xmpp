@@ -2,7 +2,7 @@ _ = require 'lodash'
 xmpp = require 'node-xmpp-server'
 MeshbluXMPP = require '../'
 
-xdescribe 'WhoAmI', ->
+describe 'WhoAmI', ->
   beforeEach (done) ->
     @server = new xmpp.C2S.TCPServer
       port: 5222
@@ -32,8 +32,10 @@ xdescribe 'WhoAmI', ->
             type: 'result'
             to: @request.attrs.from
             from: @request.attrs.to
-          )
-          .c('device').t('uuid')
+          ).c('response').c('rawData').t JSON.stringify({
+            uuid: 'uuid'
+            discoverWhitelist: ['uuid']
+          })
 
         @sut.whoami (error, @response) => done error
 
@@ -50,4 +52,7 @@ xdescribe 'WhoAmI', ->
 
       it 'should return a status of online: true', ->
         expect(@response).to.exist
-        expect(@response).to.deep.equal meshblu: 'online'
+        expect(@response).to.deep.equal {
+          uuid: 'uuid'
+          discoverWhitelist: ['uuid']
+        }

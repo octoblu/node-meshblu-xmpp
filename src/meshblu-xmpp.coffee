@@ -38,7 +38,7 @@ class MeshbluXMPP extends EventEmitter2
     @connection.once 'stanza', (stanza) =>
       @_parseResponse stanza, (error, response) =>
         return callback error if error?
-        return callback null, JSON.stringify response
+        return callback null, response.data
 
     @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('whoami')
 
