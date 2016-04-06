@@ -32,7 +32,10 @@ class MeshbluXMPP extends EventEmitter2
         return callback error if error?
         return callback null, response.data
 
-    @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('status')
+    @connection.send new Client.Stanza('iq',
+      to: @hostname
+      type: 'get'
+    ).c('request').c('metadata').c('jobType').t('GetStatus')
 
   whoami: (callback) =>
     @connection.once 'stanza', (stanza) =>
@@ -41,6 +44,12 @@ class MeshbluXMPP extends EventEmitter2
         return callback null, response.data
 
     @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('whoami')
+    stanza = new Client.Stanza('iq', to: @hostname, type: 'get')
+      .c('request')
+        .c('metadata')
+          .c('jobType').t('GetDevice').up()
+          .c('toUuid').t(@uuid).up()
+    @connection.send stanza
 
   _parseResponse: (stanza, callback) =>
     rawData = stanza.toJSON().children[0].children[0].children[0]

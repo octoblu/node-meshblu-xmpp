@@ -46,8 +46,37 @@ describe 'Status', ->
             to: 'localhost'
             type: 'get'
           children: [{
-            name: 'status'
+            name: 'request'
+            children: [{
+              name: 'metadata'
+              children: [{
+                name: 'jobType'
+                children: ['GetStatus']
+              }]
+            }]
           }]
+
+      it 'should return a status of online: true', ->
+        expect(@response).to.exist
+        expect(@response).to.deep.equal meshblu: 'online'
+
+    xdescribe 'when status is called twice', ->
+      beforeEach (done) ->
+        wait = (delay, fn) -> setTimeout fn, delay
+
+        @client.on 'stanza', (@request) =>
+          wait 100, =>
+            @client.send new xmpp.Stanza('iq',
+              type: 'result'
+              to: @request.attrs.from
+              from: @request.attrs.to
+              id: @request.attrs.id
+            ).c('response').c('rawData').t JSON.stringify({
+              meshblu: 'online'
+            })
+
+        @sut.status (error, @response) => done error
+
 
       it 'should return a status of online: true', ->
         expect(@response).to.exist

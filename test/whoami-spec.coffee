@@ -47,7 +47,17 @@ describe 'WhoAmI', ->
             to: 'localhost'
             type: 'get'
           children: [{
-            name: 'whoami'
+            name: 'request'
+            children: [{
+              name: 'metadata'
+              children: [{
+                name: 'jobType'
+                children: ['GetDevice']
+              },{
+                name: 'toUuid'
+                children: ['uuid']
+              }]
+            }]
           }]
 
       it 'should return a status of online: true', ->
