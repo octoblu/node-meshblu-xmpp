@@ -27,7 +27,26 @@ describe 'Connect', ->
 
     describe 'when status is called', ->
       beforeEach (done) ->
+        @client.on 'stanza', (@request) =>
+          @client.send new xmpp.Stanza('iq',
+            type: 'result'
+            to: @request.attrs.from
+            from: @request.attrs.to
+          ).c('meshblu').t('online')
+
         @sut.status (error, @response) => done error
 
+      it 'should send a stanza to the server', ->
+        expect(@request).to.exist
+        expect(@request.toJSON()).to.containSubset
+          name: 'iq'
+          attrs:
+            to: 'localhost'
+            type: 'get'
+          children: [{
+            name: 'status'
+          }]
+
       it 'should return a status of online: true', ->
-        expect(@response).to.deep.equal {online: true}
+        expect(@response).to.exist
+        expect(@response).to.deep.equal meshblu: 'online'

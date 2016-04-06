@@ -15,10 +15,10 @@ class MeshbluXMPP extends EventEmitter2
       host: @hostname
       port: @port
 
-    @connection.on 'online', =>
+    @connection.once 'online', =>
       callback()
 
-    @connection.on 'error', callback
+    @connection.once 'error', callback
     @connection.on 'error', (error) =>
       @emit 'error', error
 
@@ -26,6 +26,15 @@ class MeshbluXMPP extends EventEmitter2
     @connection.end()
 
   status: (callback) =>
-    callback()
+    @connection.once 'stanza', (stanza) =>
+      callback null, @_parseResponse stanza
+
+    @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('status')
+
+  _parseResponse: (stanza) =>
+    response = {}
+    _.each stanza.toJSON().children, (child) =>
+      response[child.name] = _.first child.children
+    response
 
 module.exports = MeshbluXMPP

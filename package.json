@@ -22,6 +22,7 @@
   "homepage": "https://github.com/octoblu/node-meshblu-xmpp#readme",
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-subset": "^1.2.2",
     "coffee-coverage": "^1.0.1",
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
