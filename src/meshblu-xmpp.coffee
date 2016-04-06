@@ -1,8 +1,9 @@
 _               = require 'lodash'
 {EventEmitter2} = require 'EventEmitter2'
 Client          = require 'node-xmpp-client'
+jsontoxml       = require 'jsontoxml'
+ltx             = require 'ltx'
 uuid            = require 'uuid'
-xml2js          = require 'xml2js'
 
 class MeshbluXMPP extends EventEmitter2
   constructor: (options={}) ->
@@ -33,42 +34,40 @@ class MeshbluXMPP extends EventEmitter2
     @callbacks[stanza.attrs.id]?(null, stanza)
 
   status: (callback) =>
-    responseId = uuid.v1()
-    
-    @callbacks[responseId] = (error, stanza) =>
-      delete @callbacks[responseId]
-      return callback error if error?
-      @_parseResponse stanza, (error, response) =>
-        return callback error if error?
-        return callback null, response.data
+    request =
+      metadata:
+        jobType: 'GetStatus'
 
-    @connection.send(
-      new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
-        .c('request')
-          .c('metadata')
-            .c('jobType').t('GetStatus')
-    )
+    @_sendRequest request, callback
 
   whoami: (callback) =>
-    responseId = uuid.v1()
+    request =
+      metadata:
+        jobType: 'GetDevice'
+        toUuid: @uuid
 
-    @callbacks[responseId] = (error, stanza) =>
-      delete @callbacks[responseId]
-      return callback error if error?
-      @_parseResponse stanza, (error, response) =>
-        return callback error if error?
-        return callback null, response.data
+    @_sendRequest request, callback
 
-    @connection.send(
-      new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
-        .c('request')
-          .c('metadata')
-            .c('jobType').t('GetDevice').up()
-            .c('toUuid').t(@uuid).up()
-    )
+  _buildStanza: (responseId, request) =>
+    new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
+      .c('request')
+        .cnode(ltx.parse jsontoxml request)
 
   _parseResponse: (stanza, callback) =>
     rawData = stanza.toJSON().children[0].children[0].children[0]
     callback null, { data: JSON.parse rawData }
+
+  _sendRequest: (request, callback) =>
+    responseId = uuid.v1()
+
+    @callbacks[responseId] = (error, stanza) =>
+      delete @callbacks[responseId]
+      return callback error if error?
+      @_parseResponse stanza, (error, response) =>
+        return callback error if error?
+        return callback null, response.data
+
+    @connection.send @_buildStanza(responseId, request)
+
 
 module.exports = MeshbluXMPP
