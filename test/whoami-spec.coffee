@@ -28,10 +28,12 @@ describe 'WhoAmI', ->
     describe 'when whoami is called', ->
       beforeEach (done) ->
         @client.on 'stanza', (@request) =>
+          # console.log 'whoami stanza', @request
           @client.send new xmpp.Stanza('iq',
             type: 'result'
             to: @request.attrs.from
             from: @request.attrs.to
+            id: @request.attrs.id
           ).c('response').c('rawData').t JSON.stringify({
             uuid: 'uuid'
             discoverWhitelist: ['uuid']

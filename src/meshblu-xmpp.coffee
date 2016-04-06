@@ -1,11 +1,13 @@
 _               = require 'lodash'
 {EventEmitter2} = require 'EventEmitter2'
 Client          = require 'node-xmpp-client'
+uuid            = require 'uuid'
 xml2js          = require 'xml2js'
 
 class MeshbluXMPP extends EventEmitter2
   constructor: (options={}) ->
     {@hostname,@port,@uuid,@token} = options
+    @callbacks = {}
 
   connect: (callback) =>
     callback = _.once callback
@@ -22,34 +24,48 @@ class MeshbluXMPP extends EventEmitter2
     @connection.once 'error', callback
     @connection.on 'error', (error) =>
       @emit 'error', error
+    @connection.on 'stanza', @onStanza
 
   close: =>
     @connection.end()
 
+  onStanza: (stanza) =>
+    @callbacks[stanza.attrs.id]?(null, stanza)
+
   status: (callback) =>
-    @connection.once 'stanza', (stanza) =>
+    responseId = uuid.v1()
+    
+    @callbacks[responseId] = (error, stanza) =>
+      delete @callbacks[responseId]
+      return callback error if error?
       @_parseResponse stanza, (error, response) =>
         return callback error if error?
         return callback null, response.data
 
-    @connection.send new Client.Stanza('iq',
-      to: @hostname
-      type: 'get'
-    ).c('request').c('metadata').c('jobType').t('GetStatus')
+    @connection.send(
+      new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
+        .c('request')
+          .c('metadata')
+            .c('jobType').t('GetStatus')
+    )
 
   whoami: (callback) =>
-    @connection.once 'stanza', (stanza) =>
+    responseId = uuid.v1()
+
+    @callbacks[responseId] = (error, stanza) =>
+      delete @callbacks[responseId]
+      return callback error if error?
       @_parseResponse stanza, (error, response) =>
         return callback error if error?
         return callback null, response.data
 
-    @connection.send new Client.Stanza('iq', to: @hostname, type: 'get').c('whoami')
-    stanza = new Client.Stanza('iq', to: @hostname, type: 'get')
-      .c('request')
-        .c('metadata')
-          .c('jobType').t('GetDevice').up()
-          .c('toUuid').t(@uuid).up()
-    @connection.send stanza
+    @connection.send(
+      new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
+        .c('request')
+          .c('metadata')
+            .c('jobType').t('GetDevice').up()
+            .c('toUuid').t(@uuid).up()
+    )
 
   _parseResponse: (stanza, callback) =>
     rawData = stanza.toJSON().children[0].children[0].children[0]
