@@ -1,7 +1,8 @@
-_      = require 'lodash'
-Client = require 'node-xmpp-client'
+_              = require 'lodash'
+{EventEmitter2} = require 'EventEmitter2'
+Client         = require 'node-xmpp-client'
 
-class MeshbluXMPP
+class MeshbluXMPP extends EventEmitter2
   constructor: (options={}) ->
     {@hostname,@port,@uuid,@token} = options
 
@@ -18,5 +19,13 @@ class MeshbluXMPP
       callback()
 
     @connection.on 'error', callback
+    @connection.on 'error', (error) =>
+      @emit 'error', error
+
+  close: =>
+    @connection.end()
+
+  status: (callback) =>
+    callback()
 
 module.exports = MeshbluXMPP
