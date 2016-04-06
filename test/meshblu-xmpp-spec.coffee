@@ -13,7 +13,7 @@ describe 'MeshbluXMPP', ->
   afterEach (done) ->
     @server.end done
 
-  describe 'connecting to an XMPP server', ->
+  describe 'connecting to an XMPP server that lets us in', ->
     beforeEach (done) ->
       @server.on 'connection', (@client) =>
         @client.on 'authenticate', (opts, callback) =>
@@ -29,3 +29,20 @@ describe 'MeshbluXMPP', ->
 
     it 'should have a client', ->
       expect(@client).to.exist
+
+  describe 'connecting to an XMPP server that denies us', ->
+    beforeEach (done) ->
+      @server.on 'connection', (@client) =>
+        @client.on 'authenticate', (opts, callback) =>
+          callback(false)
+
+      @sut = new MeshbluXMPP
+        uuid:  'uuid'
+        token: 'token'
+        hostname: 'localhost'
+        port: 5222
+
+      @sut.connect (@error) => done()
+
+    it 'should yield an error', ->
+      expect(=> throw @error).to.throw 'XMPP authentication failure'
