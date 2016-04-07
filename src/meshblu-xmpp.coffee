@@ -38,7 +38,17 @@ class MeshbluXMPP extends EventEmitter2
       metadata:
         jobType: 'GetStatus'
 
-    @_sendRequest request, callback
+    @_sendRequest request, 'get', callback
+
+  update: (uuid, query, callback) =>
+    request =
+      metadata:
+        jobType: 'UpdateDevice'
+        toUuid: uuid
+      rawData: JSON.stringify query
+
+    @_sendRequest request, 'set', callback
+
 
   whoami: (callback) =>
     request =
@@ -46,12 +56,11 @@ class MeshbluXMPP extends EventEmitter2
         jobType: 'GetDevice'
         toUuid: @uuid
 
-    @_sendRequest request, callback
+    @_sendRequest request, 'get', callback
 
-  _buildStanza: (responseId, request) =>
-    new Client.Stanza('iq', to: @hostname, type: 'get', id: responseId)
-      .c('request')
-        .cnode(ltx.parse jsontoxml request)
+  _buildStanza: (responseId, type, request) =>
+    new Client.Stanza('iq', to: @hostname, type: type, id: responseId)
+      .cnode(ltx.parse jsontoxml {request})
 
   _parseError: (stanza, callback) =>
     message = stanza.getChild('error').getChild('text').getText()
@@ -59,9 +68,10 @@ class MeshbluXMPP extends EventEmitter2
 
   _parseResponse: (stanza, callback) =>
     rawData = stanza.getChild('response').getChild('rawData')
+    return callback null unless rawData?
     callback null, JSON.parse(rawData.getText())
 
-  _sendRequest: (request, callback) =>
+  _sendRequest: (request, type, callback) =>
     responseId = uuid.v1()
 
     @callbacks[responseId] = (error, stanza) =>
@@ -70,7 +80,7 @@ class MeshbluXMPP extends EventEmitter2
       return @_parseError stanza, callback if stanza.attrs.type == 'error'
       return @_parseResponse stanza, callback
 
-    @connection.send @_buildStanza(responseId, request)
+    @connection.send @_buildStanza(responseId, type, request)
 
 
 module.exports = MeshbluXMPP
