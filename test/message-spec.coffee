@@ -4,6 +4,7 @@ xmpp        = require 'node-xmpp-server'
 xml2js      = require('xml2js').parseString
 MeshbluXMPP = require '../'
 
+
 describe 'Message', ->
   beforeEach (done) ->
     @server = new xmpp.C2S.TCPServer
