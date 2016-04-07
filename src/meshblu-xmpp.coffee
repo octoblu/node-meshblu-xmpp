@@ -42,6 +42,14 @@ class MeshbluXMPP extends EventEmitter2
 
     @_sendRequest request, 'set', callback
 
+  register: (opts, callback) =>
+    request =
+      metadata:
+        jobType: 'RegisterDevice'
+      rawData: JSON.stringify opts
+
+    @_sendRequest request, 'set', callback
+
   status: (callback) =>
     request =
       metadata:
