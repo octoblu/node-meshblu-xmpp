@@ -29,6 +29,7 @@ class MeshbluXMPP extends EventEmitter2
 
   close: =>
     @connection.end()
+    delete @connection
 
   onStanza: (stanza) =>
     @callbacks[stanza.attrs.id]?(null, stanza)
@@ -80,6 +81,8 @@ class MeshbluXMPP extends EventEmitter2
     callback null, JSON.parse(rawData.getText())
 
   _sendRequest: (request, type, callback) =>
+    return callback new Error('MeshbluXMPP is not connected') unless @connection?
+
     responseId = uuid.v1()
 
     @callbacks[responseId] = (error, stanza) =>

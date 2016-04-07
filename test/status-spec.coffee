@@ -18,6 +18,17 @@ describe 'Status', ->
   afterEach (done) ->
     @server.end done
 
+  describe 'without an active connection', ->
+    beforeEach ->
+      @sut = new MeshbluXMPP uuid: 'uuid', token: 'token', hostname: 'localhost', port: 5222
+
+    describe 'when status is called', ->
+      beforeEach (done) ->
+        @sut.status (@error) => done()
+
+      it 'should yield an error', ->
+        expect(=> throw @error).to.throw 'MeshbluXMPP is not connected'
+
   describe 'with an active connection', ->
     beforeEach (done) ->
       @sut = new MeshbluXMPP uuid: 'uuid', token: 'token', hostname: 'localhost', port: 5222
