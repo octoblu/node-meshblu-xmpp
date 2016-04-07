@@ -1,5 +1,6 @@
-_ = require 'lodash'
-xmpp = require 'node-xmpp-server'
+_           = require 'lodash'
+ltx         = require 'ltx'
+xmpp        = require 'node-xmpp-server'
 MeshbluXMPP = require '../'
 
 describe 'WhoAmI', ->
@@ -72,43 +73,26 @@ describe 'WhoAmI', ->
     describe 'when whoami responds with a 404', ->
       beforeEach (done) ->
         @client.on 'stanza', (@request) =>
-          # console.log 'whoami stanza', @request
-          @client.send new xmpp.Stanza('iq',
+          @client.send(new xmpp.Stanza('iq', {
             type: 'error'
             to: @request.attrs.from
             from: @request.attrs.to
             id: @request.attrs.id
-          ).c('response').c('rawData').t JSON.stringify({
-            uuid: 'uuid'
-            discoverWhitelist: ['uuid']
           })
+          .cnode(@request.getChild('request')).up()
+          .cnode ltx.parse """
+            <error type="cancel">
+              <item-not-found xmlns="urn:ietf:params:xml:ns:xmpp-stanzas" />
+              <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas' xml:lang='en-US'>Not Found</text>
+              <response xmlns="meshblu-xmpp:job-manager:response">
+                <metadata>
+                  <code>404</code>
+                </metadata>
+              </response>
+            </error>
+          """)
 
-        @sut.whoami (error, @response) => done error
+        @sut.whoami (@error) => done()
 
-      it 'should send a stanza to the server', ->
-        expect(@request).to.exist
-        expect(@request.toJSON()).to.containSubset
-          name: 'iq'
-          attrs:
-            to: 'localhost'
-            type: 'get'
-          children: [{
-            name: 'request'
-            children: [{
-              name: 'metadata'
-              children: [{
-                name: 'jobType'
-                children: ['GetDevice']
-              },{
-                name: 'toUuid'
-                children: ['uuid']
-              }]
-            }]
-          }]
-
-      it 'should return a status of online: true', ->
-        expect(@response).to.exist
-        expect(@response).to.deep.equal {
-          uuid: 'uuid'
-          discoverWhitelist: ['uuid']
-        }
+      it 'should yield an error', ->
+        expect(=> throw @error).to.throw 'Not Found'

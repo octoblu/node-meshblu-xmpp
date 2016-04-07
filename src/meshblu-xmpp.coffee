@@ -53,9 +53,13 @@ class MeshbluXMPP extends EventEmitter2
       .c('request')
         .cnode(ltx.parse jsontoxml request)
 
+  _parseError: (stanza, callback) =>
+    message = stanza.getChild('error').getChild('text').getText()
+    callback new Error(message)
+
   _parseResponse: (stanza, callback) =>
     rawData = stanza.getChild('response').getChild('rawData')
-    callback null, { data: JSON.parse rawData.getText() }
+    callback null, JSON.parse(rawData.getText())
 
   _sendRequest: (request, callback) =>
     responseId = uuid.v1()
@@ -63,9 +67,8 @@ class MeshbluXMPP extends EventEmitter2
     @callbacks[responseId] = (error, stanza) =>
       delete @callbacks[responseId]
       return callback error if error?
-      @_parseResponse stanza, (error, response) =>
-        return callback error if error?
-        return callback null, response.data
+      return @_parseError stanza, callback if stanza.attrs.type == 'error'
+      return @_parseResponse stanza, callback
 
     @connection.send @_buildStanza(responseId, request)
 
