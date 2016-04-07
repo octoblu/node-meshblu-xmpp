@@ -4,6 +4,7 @@ Client          = require 'node-xmpp-client'
 jsontoxml       = require 'jsontoxml'
 ltx             = require 'ltx'
 uuid            = require 'uuid'
+xml2js          = require('xml2js').parseString
 
 class MeshbluXMPP extends EventEmitter2
   constructor: (options={}) ->
@@ -36,7 +37,8 @@ class MeshbluXMPP extends EventEmitter2
 
   onStanza: (stanza) =>
     if stanza.name == 'message'
-      return @emit 'message', stanza.toString()
+      @_parseMessage stanza, (error, message) =>
+        return @emit 'message', message
     @callbacks[stanza.attrs.id]?(null, stanza)
 
   message: (message, callback) =>
@@ -107,5 +109,28 @@ class MeshbluXMPP extends EventEmitter2
 
     @connection.send @_buildStanza(responseId, type, request)
 
+  _parseMessage: (stanza, callback) =>
+    options =
+      explicitArray: false
+      mergeAttrs: true
+
+    xml2js stanza.toString(), options, (error, data) =>
+      return callback error if error?
+      message =
+        metadata: data.message?.metadata
+
+      if message.metadata.route?
+        unless _.isArray message.metadata.route
+          message.metadata.route = [message.metadata.route]
+
+        message.metadata.route = _.map message.metadata.route, (hip) => hip.hop
+
+      if data.message?['raw-data']?
+        try
+          message.data = JSON.parse data.message['raw-data']
+        catch
+          message.rawData = data.message['raw-data']
+
+      callback null, message
 
 module.exports = MeshbluXMPP

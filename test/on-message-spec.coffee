@@ -36,9 +36,24 @@ describe 'on: message', ->
           to: 'uuid@meshblu.octoblu.com'
           from: 'meshblu.octoblu.com'
         ).cnode(ltx.parse """
-        <metadata />
-        <raw-data />
+        <metadata>
+          <route>
+            <hop to="dude" from="dude" type="dude" />
+          </route>
+        </metadata>
+        """).up().cnode(ltx.parse """
+        <raw-data>{"foo":"bar"}</raw-data>
         """)
 
       it 'should get a message', ->
-        expect(@message).to.exist
+        expectedMessage =
+          metadata:
+            route: [
+              from: 'dude'
+              to: 'dude'
+              type: 'dude'
+            ]
+          data:
+            foo: 'bar'
+
+        expect(@message).to.deep.equal expectedMessage
