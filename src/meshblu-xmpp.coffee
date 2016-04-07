@@ -1,5 +1,5 @@
 _               = require 'lodash'
-{EventEmitter2} = require 'EventEmitter2'
+{EventEmitter2} = require 'eventemitter2'
 Client          = require 'node-xmpp-client'
 jsontoxml       = require 'jsontoxml'
 ltx             = require 'ltx'
