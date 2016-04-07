@@ -49,23 +49,23 @@ describe 'Register', ->
 
         @sut.register @opts, (error, @response) => done error
 
-      # it 'should send a stanza to the server', ->
-      #   expect(@request).to.exist
-      #   expect(@request.toJSON()).to.containSubset
-      #     name: 'iq'
-      #     attrs:
-      #       to: 'localhost'
-      #       type: 'set'
-      #     children: [{
-      #       name: 'request'
-      #       children: [{
-      #         name: 'metadata'
-      #         children: [{
-      #           name: 'jobType'
-      #           children: ['RegisterDevice']
-      #         }]
-      #       }]
-      #     }]
+      it 'should send a stanza to the server', ->
+        expect(@request).to.exist
+        expect(@request.toJSON()).to.containSubset
+          name: 'iq'
+          attrs:
+            to: 'localhost'
+            type: 'set'
+          children: [{
+            name: 'request'
+            children: [{
+              name: 'metadata'
+              children: [{
+                name: 'jobType'
+                children: ['RegisterDevice']
+              }]
+            }]
+          }]
 
       it 'should return a device', ->
         expect(@response).to.exist
