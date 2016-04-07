@@ -33,6 +33,14 @@ class MeshbluXMPP extends EventEmitter2
   onStanza: (stanza) =>
     @callbacks[stanza.attrs.id]?(null, stanza)
 
+  message: (message, callback) =>
+    request =
+      metadata:
+        jobType: 'SendMessage'
+      rawData: JSON.stringify message
+
+    @_sendRequest request, 'set', callback
+
   status: (callback) =>
     request =
       metadata:
