@@ -19,6 +19,9 @@ class MeshbluXMPP extends EventEmitter2
       host: @hostname
       port: @port
 
+    @connection.connection.socket.setTimeout(0)
+    @connection.connection.socket.setKeepAlive(true, 10000)
+
     @connection.once 'online', =>
       callback()
 
