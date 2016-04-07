@@ -35,12 +35,26 @@ class MeshbluXMPP extends EventEmitter2
     @callbacks[stanza.attrs.id]?(null, stanza)
 
   message: (message, callback) =>
-    request =
-      metadata:
-        jobType: 'SendMessage'
-      rawData: JSON.stringify message
+    responseId = uuid.v1()
+    messageXml = jsontoxml([
+      name: "message"
+      attrs:
+        type: 'normal'
+        to: "#{_.first message.devices}@meshblu.octoblu.com"
+        id: responseId
+      children: [
+        name: "body"
+        text: JSON.stringify message
+      ]
+    ])
 
-    @_sendRequest request, 'set', callback
+    @callbacks[responseId] = (error, stanza) =>
+      delete @callbacks[responseId]
+      return callback error if error?
+      return @_parseError stanza, callback if stanza.attrs.type == 'error'
+      return @_parseResponse stanza, callback
+
+    @connection.send messageXml
 
   status: (callback) =>
     request =

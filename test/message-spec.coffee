@@ -46,16 +46,15 @@ describe 'Message', ->
 
       it 'should send a stanza to the server', (done) ->
         expect(@request).to.exist
-        options = {explicitArray: false, mergeAttrs: true}
-
+        options = {explicitArray: false}
         xml2js @request.toString(), options, (error, request) =>
           return done error if error?
 
           expect(request).to.containSubset
-            iq:
-              type: 'set'
-              request:
-                metadata:
-                  jobType: 'SendMessage'
-                rawData: '{"devices":["uuid-2"],"payload":"hi"}'
+            message:
+              $:
+                type: 'normal'
+                to: 'uuid-2@meshblu.octoblu.com'
+              body:
+                '{"devices":["uuid-2"],"payload":"hi"}'
           done()
