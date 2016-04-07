@@ -72,8 +72,9 @@ class MeshbluXMPP extends EventEmitter2
       .cnode(ltx.parse jsontoxml {request})
 
   _parseError: (stanza, callback) =>
-    message = stanza.getChild('error').getChild('text').getText()
-    callback new Error(message)
+    error = new Error stanza.getChild('error').getChild('text').getText()
+    error.response =  stanza.getChild('error').toString()
+    callback error
 
   _parseResponse: (stanza, callback) =>
     rawData = stanza.getChild('response').getChild('rawData')

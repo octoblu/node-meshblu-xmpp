@@ -96,3 +96,16 @@ describe 'WhoAmI', ->
 
       it 'should yield an error', ->
         expect(=> throw @error).to.throw 'Not Found'
+
+      it 'should have the response in the error', ->
+        expect(@error.response).to.deep.equal '''
+          <error type="cancel">
+            <item-not-found xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/>
+            <text xmlns="urn:ietf:params:xml:ns:xmpp-stanzas" xml:lang="en-US">Not Found</text>
+            <response xmlns="meshblu-xmpp:job-manager:response">
+              <metadata>
+                <code>404</code>
+              </metadata>
+            </response>
+          </error>
+        '''
