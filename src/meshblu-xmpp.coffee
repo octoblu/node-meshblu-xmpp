@@ -32,6 +32,8 @@ class MeshbluXMPP extends EventEmitter2
     delete @connection
 
   onStanza: (stanza) =>
+    if stanza.name == 'message'
+      return @emit 'message', stanza.toString()
     @callbacks[stanza.attrs.id]?(null, stanza)
 
   message: (message, callback) =>
