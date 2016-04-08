@@ -65,6 +65,15 @@ conn.connect(function(data){
       console.log('Subscribe Error', err);
     });
 
+  // Search for devices by a query
+    conn.searchDevices(config.uuid, {
+      "type": "device:generic"
+    },
+      function(err, result){
+      console.log("search devices", result);
+      console.log(err);
+    });
+
 }); // conn.connect
 
 // Message handler
