@@ -1,6 +1,6 @@
 {
   "name": "meshblu-xmpp",
-  "version": "1.3.2",
+  "version": "1.4.1",
   "description": "Node Meshblu client for XMPP",
   "main": "index.js",
   "scripts": {
