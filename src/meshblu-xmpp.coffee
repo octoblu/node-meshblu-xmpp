@@ -49,6 +49,12 @@ class MeshbluXMPP extends EventEmitter2
 
     @_sendRequest request, 'set', callback
 
+  createSessionToken: (toUuid, tags, callback) =>
+    metadata =
+      toUuid: toUuid
+
+    @_JobSetRequest metadata, tags, 'CreateSessionToken', callback
+
   register: (opts, callback) =>
     @_JobSetRequest {}, opts, 'RegisterDevice', callback
 
