@@ -14,6 +14,7 @@ npm install meshblu-xmpp
 
 ### Example Usage
 
+#### Set-up
 ```js
 var meshblu = require('meshblu-xmpp');
 
@@ -28,37 +29,65 @@ var conn = new meshblu(config);
 
 conn.connect(function(data){
 
-  // Create Session token
-    conn.createSessionToken(config.uuid, {"createdAt": Date.now()},
-    function(err, result){
-      console.log('Create Session Token: ', result);
-    });
+}); // conn.connect
+```
 
-  // Check status of Meshblu
+#### Send Message
+```js
+    conn.message({"devices": ["*"], "payload": "duuude"}, function(result){
+      console.log('Send Message: ', result);
+    });
+```
+
+#### On Message
+```js
+// Message handler
+  conn.on('message', function(message){
+    console.log('Message Received: ', message);
+  });
+
+```
+
+#### Create Session Token
+```js
+  conn.createSessionToken(config.uuid, {"createdAt": Date.now()},
+  function(err, result){
+    console.log('Create Session Token: ', result);
+  });
+```
+
+#### Check status of Meshblu
+```js
     conn.status(function(err, result){
       console.log('Status:', result);
     });
+```
 
-  // Get the current authenticated device's registry
+#### Whoami
+```js
     conn.whoami(function(err, result){
       console.log('Whoami: ', result);
     });
+```
 
+#### Update
+```js
   // Update a specific device - you can add arbitrary json
     conn.update(config.uuid, { "$set": {"type": "device:generic"}}, function(err, device){
       console.log('Update Device:', device);
     });
+```
 
+#### Register
+```js
   // Register a new device
     conn.register({"type": "device:generic"}, function(err, device){
       console.log('Register Device: ', device);
     });
+```
 
-  // Send a message
-    conn.message({"devices": ["*"], "payload": "duuude"}, function(result){
-      console.log('Send Message: ', result);
-    });
-
+#### Subscribe
+```js
   // Subscribe to your own messages to enable recieving them
   // conn.unsubscribe takes the same arguments
     conn.subscribe(config.uuid,
@@ -69,7 +98,10 @@ conn.connect(function(data){
     }, function(err, result){
       console.log('Subscribe: ', result);
     });
+```
 
+#### Search Devices
+```js
   // Search for devices by a query
     conn.searchDevices(config.uuid, {
       "type": "device:generic"
@@ -78,12 +110,4 @@ conn.connect(function(data){
       console.log('Search Devices: ', result);
       console.log(err);
     });
-
-}); // conn.connect
-
-// Message handler
-  conn.on('message', function(message){
-    console.log('Message Received: ', message);
-  });
-
 ```
