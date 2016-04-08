@@ -50,12 +50,7 @@ class MeshbluXMPP extends EventEmitter2
     @_sendRequest request, 'set', callback
 
   register: (opts, callback) =>
-    request =
-      metadata:
-        jobType: 'RegisterDevice'
-      rawData: JSON.stringify opts
-
-    @_sendRequest request, 'set', callback
+    @_JobSetRequest {}, opts, 'RegisterDevice', callback
 
   status: (callback) =>
     request =
@@ -63,6 +58,11 @@ class MeshbluXMPP extends EventEmitter2
         jobType: 'GetStatus'
 
     @_sendRequest request, 'get', callback
+
+  subscribe: (uuid, opts, callback) =>
+    metadata =
+      toUuid: uuid
+    @_JobSetRequest metadata, opts, 'CreateSubscription', callback
 
   update: (uuid, query, callback) =>
     request =
@@ -81,6 +81,16 @@ class MeshbluXMPP extends EventEmitter2
         toUuid: @uuid
 
     @_sendRequest request, 'get', callback
+
+  _JobSetRequest: (metadata, opts, jobType, callback) =>
+    request =
+      metadata:
+        jobType: jobType
+      rawData: JSON.stringify opts
+
+    request.metadata = _.merge request.metadata, metadata
+
+    @_sendRequest request, 'set', callback
 
   _buildStanza: (responseId, type, request) =>
     new Client.Stanza('iq', to: @hostname, type: type, id: responseId)
@@ -132,5 +142,7 @@ class MeshbluXMPP extends EventEmitter2
           message.rawData = data.message['raw-data']
 
       callback null, message
+
+
 
 module.exports = MeshbluXMPP

@@ -47,6 +47,10 @@ conn.connect(function(data){
       console.log(result);
     });
 
+    conn.on('message', function(message){
+      console.log(message);
+    });
+
 });
 
 ```
