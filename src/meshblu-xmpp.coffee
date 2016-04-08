@@ -52,6 +52,11 @@ class MeshbluXMPP extends EventEmitter2
   register: (opts, callback) =>
     @_JobSetRequest {}, opts, 'RegisterDevice', callback
 
+  searchDevices: (uuid, query={}, callback) =>
+    metadata =
+      fromUuid: uuid
+    @_JobSetRequest metadata, query, 'SearchDevices', callback
+
   status: (callback) =>
     request =
       metadata:
@@ -63,6 +68,9 @@ class MeshbluXMPP extends EventEmitter2
     metadata =
       toUuid: uuid
     @_JobSetRequest metadata, opts, 'CreateSubscription', callback
+
+  unsubscribe: (uuid, opts, callback) =>
+    @subscribe uuid, opts, callback
 
   update: (uuid, query, callback) =>
     request =
