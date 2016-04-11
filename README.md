@@ -34,80 +34,80 @@ conn.connect(function(data){
 
 #### Send Message
 ```js
-    conn.message({"devices": ["*"], "payload": "duuude"}, function(result){
-      console.log('Send Message: ', result);
-    });
+conn.message({"devices": ["*"], "payload": "duuude"}, function(result){
+  console.log('Send Message: ', result);
+});
 ```
 
 #### On Message
 ```js
 // Message handler
-  conn.on('message', function(message){
-    console.log('Message Received: ', message);
-  });
+conn.on('message', function(message){
+  console.log('Message Received: ', message);
+});
 
 ```
 
 #### Create Session Token
 ```js
-  conn.createSessionToken(config.uuid, {"createdAt": Date.now()},
-  function(err, result){
-    console.log('Create Session Token: ', result);
-  });
+conn.createSessionToken(config.uuid, {"createdAt": Date.now()},
+function(err, result){
+  console.log('Create Session Token: ', result);
+});
 ```
 
 #### Check status of Meshblu
 ```js
-    conn.status(function(err, result){
-      console.log('Status:', result);
-    });
+conn.status(function(err, result){
+  console.log('Status:', result);
+});
 ```
 
 #### Whoami
 ```js
-    conn.whoami(function(err, result){
-      console.log('Whoami: ', result);
-    });
+conn.whoami(function(err, result){
+  console.log('Whoami: ', result);
+});
 ```
 
 #### Update
 ```js
-  // Update a specific device - you can add arbitrary json
-    conn.update(config.uuid, { "$set": {"type": "device:generic"}}, function(err, device){
-      console.log('Update Device:', device);
-    });
+// Update a specific device - you can add arbitrary json
+conn.update(config.uuid, { "$set": {"type": "device:generic"}}, function(err, device){
+  console.log('Update Device:', device);
+});
 ```
 
 #### Register
 ```js
-  // Register a new device
-    conn.register({"type": "device:generic"}, function(err, device){
-      console.log('Register Device: ', device);
-    });
+// Register a new device
+conn.register({"type": "device:generic"}, function(err, device){
+  console.log('Register Device: ', device);
+});
 ```
 
 #### Subscribe
 ```js
-  // Subscribe to your own messages to enable recieving them
-  // conn.unsubscribe takes the same arguments
-    conn.subscribe(config.uuid,
-      {
-      "subscriberUuid" : config.uuid,
-      "emitterUuid": config.uuid,
-      "type": 'message.received'
-    }, function(err, result){
-      console.log('Subscribe: ', result);
-    });
+// Subscribe to your own messages to enable recieving them
+// conn.unsubscribe takes the same arguments
+var subscription = {
+  "subscriberUuid" : config.uuid,
+  "emitterUuid": config.uuid,
+  "type": 'message.received'
+};
+conn.subscribe(config.uuid, subscription, function(err, result){
+  console.log('Subscribe: ', result);
+});
 ```
 
 #### Search Devices
 ```js
-  // Search for devices by a query
-    conn.searchDevices(config.uuid, {
-      "type": "device:generic"
-    },
-      function(err, result){
-      console.log('Search Devices: ', result);
-      console.log(err);
-    });
+// Search for devices by a query
+var query = {
+  "type": "device:generic"
+};
+conn.searchDevices(config.uuid, query, function(err, result){
+  console.log('Search Devices: ', result);
+  console.log(err);
+});
 ```
