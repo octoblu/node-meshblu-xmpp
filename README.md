@@ -16,7 +16,7 @@ npm install meshblu-xmpp
 
 #### Set-up
 ```js
-var meshblu = require('meshblu-xmpp');
+var Meshblu = require('meshblu-xmpp');
 
 var config = {
   'hostname': 'meshblu-xmpp.octoblu.com',
@@ -25,7 +25,7 @@ var config = {
   'token': ''
 }
 
-var conn = new meshblu(config);
+var conn = new Meshblu(config);
 
 conn.connect(function(data){
 

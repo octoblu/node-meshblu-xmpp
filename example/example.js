@@ -1,4 +1,4 @@
-var meshblu = require('../index.js');
+var Meshblu = require('../index.js');
 
 var config = {
   'hostname': 'meshblu-xmpp.octoblu.com',
@@ -7,7 +7,7 @@ var config = {
   'token': ''
 }
 
-var conn = new meshblu(config);
+var conn = new Meshblu(config);
 
 conn.connect(function(data){
 
