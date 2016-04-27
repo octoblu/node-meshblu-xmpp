@@ -1,4 +1,4 @@
-# node-meshblu-xmpp
+# Node Meshblu XMPP
 Node Meshblu client for XMPP
 
 [![Build Status](https://travis-ci.org/octoblu/node-meshblu-xmpp.svg?branch=master)](https://travis-ci.org/octoblu/)
@@ -8,6 +8,7 @@ Node Meshblu client for XMPP
 [![Gitter](https://badges.gitter.im/octoblu/help.svg)](https://gitter.im/octoblu/help)
 
 ### Install
+
 ```bash
 npm install meshblu-xmpp
 ```
@@ -15,78 +16,115 @@ npm install meshblu-xmpp
 ### Example Usage
 
 #### Set-up
+
 ```js
 var Meshblu = require('meshblu-xmpp');
 
 var config = {
-  'hostname': 'meshblu-xmpp.octoblu.com',
-  'port': 5222,
-  'uuid': '',
-  'token': ''
+  hostname: 'meshblu-xmpp.octoblu.com',
+  port: 5222,
+  uuid: 'cf2497d2-7426-46c4-a229-ad789063bf88',
+  token: 'a0178530f1d15f17ddcae60ae7198fc954c2ef53'
 }
 
 var conn = new Meshblu(config);
 
-conn.connect(function(data){
-
-}); // conn.connect
+conn.connect(function(error){
+  if (error) {
+    throw error;
+  }
+  console.log('Connected');
+});
 ```
 
 #### Send Message
+
 ```js
-conn.message({"devices": ["*"], "payload": "duuude"}, function(result){
-  console.log('Send Message: ', result);
+var message = {
+  "devices": ["*"],
+  "payload": "duuude"
+};
+conn.message(message, function(error){
+  if (error) {
+    panic(error);
+  }
+  console.log('Sent Message');
 });
 ```
 
 #### On Message
+
 ```js
 // Message handler
 conn.on('message', function(message){
   console.log('Message Received: ', message);
 });
-
 ```
 
 #### Create Session Token
+
 ```js
-conn.createSessionToken(config.uuid, {"createdAt": Date.now()},
-function(err, result){
+conn.createSessionToken(config.uuid, {"name": "my token"}, function(error, result){
+  if (error) {
+    panic(error);
+  }
   console.log('Create Session Token: ', result);
 });
 ```
 
 #### Check status of Meshblu
+
 ```js
-conn.status(function(err, result){
+conn.status(function(error, result){
+  if (error) {
+    panic(error);
+  }
   console.log('Status:', result);
 });
 ```
 
 #### Whoami
+
 ```js
-conn.whoami(function(err, result){
-  console.log('Whoami: ', result);
+conn.whoami(function(error, device){
+  if (error) {
+    panic(error);
+  }
+  console.log('Whoami: ', device);
 });
 ```
 
 #### Update
+
 ```js
-// Update a specific device - you can add arbitrary json
-conn.update(config.uuid, { "$set": {"type": "device:generic"}}, function(err, device){
-  console.log('Update Device:', device);
-});
+  var update = {
+    "$set": {
+      "type": "device:generic"
+    }
+  };
+  conn.update(config.uuid, update, function(error){
+    if (error) {
+      panic(error);
+    }
+    console.log('Updated the device');
+  });
 ```
 
 #### Register
+
 ```js
 // Register a new device
-conn.register({"type": "device:generic"}, function(err, device){
-  console.log('Register Device: ', device);
+
+conn.register({"type": "device:generic"}, function(error, device){
+  if (error) {
+    panic(error);
+  }
+  console.log('Registered a new Device: ', device);
 });
 ```
 
 #### Subscribe
+
 ```js
 // Subscribe to your own messages to enable recieving them
 // conn.unsubscribe takes the same arguments
